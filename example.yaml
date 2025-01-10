@@ -22,11 +22,31 @@ ota:
 logger:
   baud_rate: 0
 
+web_server:
+
 time:
   - platform: system_time
     id: sys_time
+    start_datetime:
+      year: 2024
+      month: 12
+      day: 31
+      hour: 12
+      minute: 34
+      second: 56
     on_time:
       - seconds: /5
         then:
           lambda: |-
             ESP_LOGD("", "it's %s", id(sys_time).now().strftime("%Y-%m-%d %H:%M:%S").c_str());
+
+datetime:
+  - platform: template
+    id: start_datetime
+    type: datetime
+    name: Pick a start datetime
+    optimistic: yes
+    on_value:
+      then:
+        lambda: |-
+          id(sys_time).set_start_datetime(x);

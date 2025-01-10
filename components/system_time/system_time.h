@@ -11,6 +11,9 @@ class SystemTimeComponent : public time::RealTimeClock {
   void update() override;
   void dump_config() override;
 
+  void set_start_datetime(ESPTime);
+ protected:
+  uint32_t start_datetime_;
 };
 }  // namespace system_time
 }  // namespace esphome
