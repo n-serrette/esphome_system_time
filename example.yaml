@@ -48,5 +48,6 @@ datetime:
     optimistic: yes
     on_value:
       then:
-        lambda: |-
-          id(sys_time).set_start_datetime(x);
+        system_time.start_datetime_set:
+          id: sys_time
+          start_datetime: !lambda 'return x;'

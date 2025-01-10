@@ -15,5 +15,18 @@ class SystemTimeComponent : public time::RealTimeClock {
  protected:
   uint32_t start_datetime_;
 };
+
+template<typename... Ts>
+class SystemTimeSetStartDateTimeAction : public Action<Ts...>, public Parented<SystemTimeComponent> {
+ public:
+  TEMPLATABLE_VALUE(ESPTime, start_datetime)
+
+  void play(Ts... x) override {
+    if (!this->start_datetime_.has_value())
+      return;
+    this->parent_->set_start_datetime(this->start_datetime_.value(x...));
+  }
+};
+
 }  // namespace system_time
 }  // namespace esphome
