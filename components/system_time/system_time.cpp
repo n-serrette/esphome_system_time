@@ -38,5 +38,23 @@ void SystemTimeComponent::set_start_datetime(ESPTime datetime) {
   ESP_LOGD(TAG, "set start datetime %s => %d", datetime.strftime("%Y-%m-%d %H:%M:%S").c_str(), datetime.timestamp);
   this->update();
 }
+
+void SystemTimeComponent::set_current_datetime(ESPTime datetime) {
+  datetime.day_of_week = 1;
+  datetime.day_of_year = 1;
+  datetime.recalc_timestamp_utc(false);
+
+  if (datetime.timestamp < START_TIMESTAMP) {
+    this->start_datetime_ = START_TIMESTAMP;
+    ESP_LOGW(TAG, "trying to set an invalid time %s", datetime.strftime("%Y-%m-%d %H:%M:%S").c_str());
+    this->update();
+    return;
+  }
+
+  this->start_datetime_ = datetime.timestamp - (millis() / 1000);
+  ESP_LOGD(TAG, "set current datetime %s => %d", datetime.strftime("%Y-%m-%d %H:%M:%S").c_str(), datetime.timestamp);
+  this->update();
+}
+
 }  // namespace system_time
 }  // namespace esphome

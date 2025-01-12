@@ -10,6 +10,7 @@ from esphome.const import (
     CONF_DAY,
     CONF_MONTH,
     CONF_YEAR,
+    CONF_DATETIME
 )
 
 CONF_START_DATETIME = "start_datetime"
@@ -18,6 +19,7 @@ systemTime_ns = cg.esphome_ns.namespace("system_time")
 SystemTimeComponent = systemTime_ns.class_("SystemTimeComponent", time.RealTimeClock)
 
 SystemTimeSetStartDateTimeAction = systemTime_ns.class_("SystemTimeSetStartDateTimeAction", automation.Action)
+SystemTimeSetCurrentDateTimeAction = systemTime_ns.class_("SystemTimeSetCurrentDateTimeAction", automation.Action)
 
 CONFIG_SCHEMA = time.TIME_SCHEMA.extend(
     {
@@ -49,14 +51,14 @@ async def to_code(config):
     await time.register_time(var, config)
 
 
-SET_DATETIME_SCHEMA = cv.Schema(
+SET_DATETIME_SCHEMA = cv.maybe_simple_value(
     {
-        cv.Required(CONF_ID): cv.use_id(SystemTimeComponent),
-        cv.Required(CONF_START_DATETIME): cv.Any(
-            cv.returning_lambda, cv.date_time(date=True, time=True)
-        ),
+        cv.GenerateID(): cv.use_id(SystemTimeComponent),
+        cv.Required(CONF_DATETIME): cv.templatable(cv.date_time(date= True, time=True)),
     },
+    key=CONF_DATETIME,
 )
+
 
 @automation.register_action(
     "system_time.start_datetime_set",
@@ -67,11 +69,30 @@ async def datetime_datetime_set_to_code(config, action_id, template_arg, args):
     action_var = cg.new_Pvariable(action_id, template_arg)
     await cg.register_parented(action_var, config[CONF_ID])
 
-    datetime_config = config[CONF_START_DATETIME]
+    datetime_config = config[CONF_DATETIME]
     if cg.is_template(datetime_config):
         template_ = await cg.templatable(datetime_config, args, cg.ESPTime)
         cg.add(action_var.set_start_datetime(template_))
     else:
-        datetime_struct = datetimeConfigToCode(config[CONF_START_DATETIME])
+        datetime_struct = datetimeConfigToCode(config[CONF_DATETIME])
         cg.add(action_var.set_start_datetime(datetime_struct))
+    return action_var
+
+
+@automation.register_action(
+    "system_time.current_datetime_set",
+    SystemTimeSetCurrentDateTimeAction,
+    SET_DATETIME_SCHEMA,
+)
+async def datetime_datetime_set_to_code(config, action_id, template_arg, args):
+    action_var = cg.new_Pvariable(action_id, template_arg)
+    await cg.register_parented(action_var, config[CONF_ID])
+
+    datetime_config = config[CONF_DATETIME]
+    if cg.is_template(datetime_config):
+        template_ = await cg.templatable(datetime_config, args, cg.ESPTime)
+        cg.add(action_var.set_current_datetime(template_))
+    else:
+        datetime_struct = datetimeConfigToCode(config[CONF_DATETIME])
+        cg.add(action_var.set_current_datetime(datetime_struct))
     return action_var

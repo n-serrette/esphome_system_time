@@ -12,6 +12,8 @@ class SystemTimeComponent : public time::RealTimeClock {
   void dump_config() override;
 
   void set_start_datetime(ESPTime);
+  void set_current_datetime(ESPTime);
+
  protected:
   uint32_t start_datetime_;
 };
@@ -25,6 +27,18 @@ class SystemTimeSetStartDateTimeAction : public Action<Ts...>, public Parented<S
     if (!this->start_datetime_.has_value())
       return;
     this->parent_->set_start_datetime(this->start_datetime_.value(x...));
+  }
+};
+
+template<typename... Ts>
+class SystemTimeSetCurrentDateTimeAction : public Action<Ts...>, public Parented<SystemTimeComponent> {
+ public:
+  TEMPLATABLE_VALUE(ESPTime, current_datetime)
+
+  void play(Ts... x) override {
+    if (!this->current_datetime_.has_value())
+      return;
+    this->parent_->set_start_datetime(this->current_datetime_.value(x...));
   }
 };
 

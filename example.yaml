@@ -48,6 +48,13 @@ datetime:
     optimistic: yes
     on_value:
       then:
-        system_time.start_datetime_set:
-          id: sys_time
-          start_datetime: !lambda 'return x;'
+        system_time.start_datetime_set: !lambda 'return x;'
+
+  - platform: template
+    id: current_datetime
+    type: datetime
+    name: Pick a current datetime
+    optimistic: yes
+    on_value:
+      then:
+        - system_time.current_datetime_set: !lambda 'return x;'
